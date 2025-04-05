@@ -21,12 +21,12 @@ if 'due_input' not in st.session_state:
 if 'manual_date_input' not in st.session_state:
     st.session_state.manual_date_input = ""
 
-# إدخال التاريخ في الأعلى
+# إدخال التاريخ
 st.subheader("Today's Date")
-manual_date = st.text_input("Enter today's date (e.g., 1/4)", st.session_state.manual_date_input)
-st.session_state.manual_date_input = manual_date  # تحديث التاريخ في الجلسة
+manual_date = st.text_input("Date", st.session_state.manual_date_input)
+st.session_state.manual_date_input = manual_date
 
-# قسم إدخال العامل
+# إضافة عامل
 st.subheader("Add Worker")
 name = st.text_input("Name", st.session_state.name_input)
 value = st.text_input("Enter the total :", st.session_state.value_input)
@@ -95,17 +95,25 @@ if st.button("OK"):
     else:
         st.warning("Please fill in at least date, name, and total.")
 
-# عرض التاريخ كمربع فوق الجدول
+# عرض الجدول مع سطر التاريخ فوق البيانات
 if st.session_state.workers:
-    st.markdown(f"""
-        <div style="border: 2px solid #ddd; padding: 10px; text-align: center; font-weight: bold; font-size: 18px; background-color: #f9f9f9;">
-            {manual_date}
-        </div>
-        """, unsafe_allow_html=True)
-
     df = pd.DataFrame(st.session_state.workers)
+    df = df[["Worker", "Total", "Due", "Withdrawn", "Remaining"]]
+
+    # إنشاء صف للتاريخ بنفس الأعمدة
+    date_row = pd.DataFrame([{
+        "Worker": f"Date: {manual_date}",
+        "Total": "",
+        "Due": "",
+        "Withdrawn": "",
+        "Remaining": ""
+    }])
+
+    # دمج صف التاريخ مع البيانات
+    df_with_date = pd.concat([date_row, df], ignore_index=True)
+
     st.markdown("### Workers Table")
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(df_with_date, use_container_width=True)
 
     total_sum = sum([w['Total'] for w in st.session_state.workers if isinstance(w['Total'], (int, float))])
     for_workera = sum([
