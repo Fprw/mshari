@@ -25,9 +25,9 @@ if 'date_input' not in st.session_state:
 # Input fields
 st.subheader("Add Worker")
 
-# 1. تاريخ يدوي باستخدام تقويم
+# إدخال التاريخ باستخدام تقويم وتنسيقه بشكل يدوي (متوافق مع جميع الأنظمة)
 date_input = st.date_input("Date", st.session_state.date_input, format="DD/MM")
-date_str = date_input.strftime("%-d/%-m")  # مثال: "1/4"
+date_str = date_input.strftime("%d/%m").lstrip("0").replace("/0", "/")  # مثل 1/4
 
 name = st.text_input("Name", st.session_state.name_input)
 value = st.text_input("Enter the total :", st.session_state.value_input)
@@ -85,7 +85,7 @@ if st.button("OK"):
                     "Remaining": clean_number(final_amount)
                 })
 
-            # حفظ التاريخ المختار وإعادة تعيين الحقول
+            # Reset inputs
             st.session_state.date_input = date_input
             st.session_state.name_input = ""
             st.session_state.value_input = ""
@@ -99,10 +99,10 @@ if st.button("OK"):
     else:
         st.warning("Please fill in at least name and total.")
 
-# عرض الجدول
+# Display Table and Summary
 if st.session_state.workers:
     df = pd.DataFrame(st.session_state.workers)
-    df = df[["Date", "Worker", "Total", "Due", "Withdrawn", "Remaining"]]
+    df = df[["Date", "Worker", "Total", "Due", "Withdrawn", "Remaining"]]  # ترتيب الأعمدة
     st.markdown("### Workers Table")
     st.dataframe(df, use_container_width=True)
 
