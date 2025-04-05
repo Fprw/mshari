@@ -1,7 +1,5 @@
 import streamlit as st
 import pandas as pd
-from fpdf import FPDF
-import base64
 
 def clean_number(n):
     return int(n) if n == int(n) else n
@@ -82,13 +80,12 @@ if st.button("OK"):
     else:
         st.warning("Please fill in at least name and total.")
 
-# Display Table
+# Display Table and Summary
 if st.session_state.workers:
     df = pd.DataFrame(st.session_state.workers)
     st.markdown("### Workers Table")
     st.dataframe(df, use_container_width=True)
 
-    # Summary calculations
     total_sum = sum([w['Total'] for w in st.session_state.workers])
     for_workera = sum([w['Withdrawn'] + w['Remaining'] for w in st.session_state.workers])
     for_cleanfoam = total_sum - for_workera
@@ -96,35 +93,5 @@ if st.session_state.workers:
     st.markdown(f"### Total of All Workers: **{clean_number(total_sum)}**")
     st.markdown(f"**For workera:** {clean_number(for_workera)}")
     st.markdown(f"**For CleanFoam:** {clean_number(for_cleanfoam)}")
-
-    # PDF export button
-    def generate_pdf(dataframe):
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        pdf.cell(200, 10, txt="Workers Payment Report", ln=True, align="C")
-
-        pdf.set_font("Arial", style="B", size=12)
-        headers = ["Worker", "Total", "Due", "Withdrawn", "Remaining"]
-        col_widths = [40, 30, 30, 30, 30]
-        for i, header in enumerate(headers):
-            pdf.cell(col_widths[i], 10, header, border=1, align='C')
-        pdf.ln()
-
-        pdf.set_font("Arial", size=12)
-        for _, row in dataframe.iterrows():
-            pdf.cell(col_widths[0], 10, str(row["Worker"]), border=1, align='C')
-            pdf.cell(col_widths[1], 10, str(row["Total"]), border=1, align='C')
-            pdf.cell(col_widths[2], 10, str(row["Due"]), border=1, align='C')
-            pdf.cell(col_widths[3], 10, str(row["Withdrawn"]), border=1, align='C')
-            pdf.cell(col_widths[4], 10, str(row["Remaining"]), border=1, align='C')
-            pdf.ln()
-
-        return pdf.output(dest='S').encode('latin-1')
-
-    pdf_bytes = generate_pdf(df)
-    b64 = base64.b64encode(pdf_bytes).decode()
-    href = f'<a href="data:application/octet-stream;base64,{b64}" download="workers_report.pdf">📄 Download PDF Report</a>'
-    st.markdown(href, unsafe_allow_html=True)
 else:
     st.info("No workers added yet.")
