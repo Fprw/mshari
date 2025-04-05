@@ -20,7 +20,7 @@ if 'due_input' not in st.session_state:
     st.session_state.due_input = ""
 
 # Input fields
-st.subheader("Add New Worker")
+st.subheader("Add Worker")
 name = st.text_input("Worker Name", st.session_state.name_input)
 value = st.text_input("Enter the total :", st.session_state.value_input)
 withdrawn = st.text_input("Enter the withdrawn:", st.session_state.withdrawn_input)
@@ -107,7 +107,7 @@ if st.session_state.workers:
     st.markdown(f"**For CleanFoam:** {clean_number(for_cleanfoam)}")
 
     # Delete worker
-    st.markdown("### Delete a Worker")
+    st.markdown("### Delete")
     worker_names = [w['Worker'] for w in st.session_state.workers]
     selected_worker = st.selectbox("Select worker to delete", worker_names)
 
