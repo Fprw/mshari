@@ -4,18 +4,18 @@ import pandas as pd
 def clean_number(n):
     return int(n) if n == int(n) else n
 
-st.set_page_config(page_title="CleanFoam", page_icon="✅")
-st.title("CleanFoam")
+st.set_page_config(page_title="Workers Payment Calculator", page_icon="✅")
+st.title("Workers Payment Calculator")
 
 # Initialize session state
 if 'workers' not in st.session_state:
     st.session_state.workers = []
 
-# Input fields
+# Input fields (بدون key في النصوص)
 st.subheader("Add New Worker")
-name = st.text_input("Worker Name", key="name")
-value = st.text_input("Enter the total :", key="value")
-withdrawn = st.text_input("Enter the withdrawn:", key="withdrawn")
+name = st.text_input("Worker Name")
+value = st.text_input("Enter the total :")
+withdrawn = st.text_input("Enter the withdrawn:")
 
 # OK Button
 if st.button("OK"):
@@ -53,11 +53,7 @@ if st.button("OK"):
                 "Remaining": clean_number(final_amount)
             })
 
-            # Clear input fields
-            st.session_state.name = ""
-            st.session_state.value = ""
-            st.session_state.withdrawn = ""
-
+            # Refresh page to clear inputs
             st.experimental_rerun()
 
         except ValueError:
@@ -74,3 +70,5 @@ if st.session_state.workers:
     # Show total of all "Total" values
     total_sum = sum([w['Total'] for w in st.session_state.workers])
     st.markdown(f"### Total of All Workers: **{clean_number(total_sum)}**")
+else:
+    st.info("No workers added yet.")
