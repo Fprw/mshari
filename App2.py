@@ -27,7 +27,7 @@ withdrawn = st.text_input("Enter the withdrawn:", st.session_state.withdrawn_inp
 due_optional = st.text_input("Enter custom Due (optional):", st.session_state.due_input)
 
 # New checkbox: Disable division by 2
-disable_division = st.checkbox("Disable division by 2")
+disable_division = st.checkbox("Omar and CF")
 
 if st.button("OK"):
     if name and value:
