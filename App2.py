@@ -21,7 +21,7 @@ if 'due_input' not in st.session_state:
 
 # Input fields
 st.subheader("Add Worker")
-name = st.text_input("Worker Name", st.session_state.name_input)
+name = st.text_input("Name", st.session_state.name_input)
 value = st.text_input("Enter the total :", st.session_state.value_input)
 withdrawn = st.text_input("Enter the withdrawn:", st.session_state.withdrawn_input)
 due_optional = st.text_input("Enter custom Due (optional):", st.session_state.due_input)
