@@ -1,4 +1,12 @@
+import streamlit as st
+import pandas as pd
 from datetime import datetime
+
+def clean_number(n):
+    return int(n) if n == int(n) else n
+
+st.set_page_config(page_title="CleanFoam", page_icon="✅")
+st.title("CleanFoam")
 
 # Session state init
 if 'workers' not in st.session_state:
@@ -19,7 +27,7 @@ st.subheader("Add Worker")
 
 # 1. تاريخ يدوي باستخدام تقويم
 date_input = st.date_input("Date", st.session_state.date_input, format="DD/MM")
-date_str = date_input.strftime("%-d/%-m")  # "1/4" مثلاً
+date_str = date_input.strftime("%-d/%-m")  # مثال: "1/4"
 
 name = st.text_input("Name", st.session_state.name_input)
 value = st.text_input("Enter the total :", st.session_state.value_input)
@@ -91,14 +99,34 @@ if st.button("OK"):
     else:
         st.warning("Please fill in at least name and total.")
 
-# ترتيب الجدول وإظهاره كما في السابق
+# عرض الجدول
 if st.session_state.workers:
     df = pd.DataFrame(st.session_state.workers)
     df = df[["Date", "Worker", "Total", "Due", "Withdrawn", "Remaining"]]
     st.markdown("### Workers Table")
     st.dataframe(df, use_container_width=True)
 
-    # الحسابات...
+    total_sum = sum([w['Total'] for w in st.session_state.workers if isinstance(w['Total'], (int, float))])
+    for_workera = sum([
+        (w['Withdrawn'] if isinstance(w['Withdrawn'], (int, float)) else 0) +
+        (w['Remaining'] if isinstance(w['Remaining'], (int, float)) else 0)
+        for w in st.session_state.workers
+    ])
+    for_cleanfoam = total_sum - for_workera
+
+    st.markdown(f"### Total: **{clean_number(total_sum)}**")
+    st.markdown(f"**For workera:** {clean_number(for_workera)}")
+    st.markdown(f"**For CleanFoam:** {clean_number(for_cleanfoam)}")
+
+    # حذف عامل
+    st.markdown("### Delete")
+    worker_names = [w['Worker'] for w in st.session_state.workers]
+    selected_worker = st.selectbox("Select worker to delete", worker_names)
+
+    if st.button("Delete"):
+        st.session_state.workers = [w for w in st.session_state.workers if w['Worker'] != selected_worker]
+        st.success(f"Worker '{selected_worker}' has been deleted.")
+        st.rerun()
 
 else:
     st.info("No workers added yet.")
