@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
 
 def clean_number(n):
     return int(n) if n == int(n) else n
@@ -19,15 +18,14 @@ if 'withdrawn_input' not in st.session_state:
     st.session_state.withdrawn_input = ""
 if 'due_input' not in st.session_state:
     st.session_state.due_input = ""
-if 'date_input' not in st.session_state:
-    st.session_state.date_input = datetime.today()
+if 'manual_date_input' not in st.session_state:
+    st.session_state.manual_date_input = ""
 
 # Input fields
 st.subheader("Add Worker")
 
-# إدخال التاريخ باستخدام تقويم وتنسيقه بشكل يدوي (متوافق مع جميع الأنظمة)
-date_input = st.date_input("Date", st.session_state.date_input, format="DD/MM")
-date_str = date_input.strftime("%d/%m").lstrip("0").replace("/0", "/")  # مثل 1/4
+# التاريخ اليدوي قبل الاسم
+manual_date = st.text_input("Date", st.session_state.manual_date_input)
 
 name = st.text_input("Name", st.session_state.name_input)
 value = st.text_input("Enter the total :", st.session_state.value_input)
@@ -36,7 +34,7 @@ due_optional = st.text_input("Enter custom Due (optional):", st.session_state.du
 is_cf = st.checkbox("CF")
 
 if st.button("OK"):
-    if name and value:
+    if manual_date and name and value:
         try:
             value_f = float(value)
             withdrawn_f = float(withdrawn) if withdrawn else 0
@@ -44,7 +42,7 @@ if st.button("OK"):
 
             if is_cf:
                 st.session_state.workers.append({
-                    "Date": date_str,
+                    "Date": manual_date,
                     "Worker": name,
                     "Total": clean_number(value_f),
                     "Due": "",
@@ -77,7 +75,7 @@ if st.button("OK"):
                 final_amount = after_withdraw - fee
 
                 st.session_state.workers.append({
-                    "Date": date_str,
+                    "Date": manual_date,
                     "Worker": name,
                     "Total": clean_number(value_f),
                     "Due": clean_number(fee),
@@ -85,8 +83,8 @@ if st.button("OK"):
                     "Remaining": clean_number(final_amount)
                 })
 
-            # Reset inputs
-            st.session_state.date_input = date_input
+            # Clear inputs
+            st.session_state.manual_date_input = ""
             st.session_state.name_input = ""
             st.session_state.value_input = ""
             st.session_state.withdrawn_input = ""
@@ -97,7 +95,7 @@ if st.button("OK"):
         except ValueError:
             st.error("Please enter valid numbers.")
     else:
-        st.warning("Please fill in at least name and total.")
+        st.warning("Please fill in at least date, name, and total.")
 
 # Display Table and Summary
 if st.session_state.workers:
@@ -118,7 +116,7 @@ if st.session_state.workers:
     st.markdown(f"**For workera:** {clean_number(for_workera)}")
     st.markdown(f"**For CleanFoam:** {clean_number(for_cleanfoam)}")
 
-    # حذف عامل
+    # Delete worker
     st.markdown("### Delete")
     worker_names = [w['Worker'] for w in st.session_state.workers]
     selected_worker = st.selectbox("Select worker to delete", worker_names)
