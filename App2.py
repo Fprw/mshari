@@ -1,35 +1,45 @@
 import streamlit as st
+import pandas as pd
 
 def clean_number(n):
     return int(n) if n == int(n) else n
 
-st.set_page_config(page_title="CleanFoam", page_icon="💰")
+st.set_page_config(page_title="CleanFoam", page_icon="✅")
 st.title("CleanFoam")
 
 # إعداد session_state
 if 'workers' not in st.session_state:
     st.session_state.workers = []
 
+if 'last_added' not in st.session_state:
+    st.session_state.last_added = ""
+
+if 'name' not in st.session_state:
+    st.session_state.name = ""
+if 'value' not in st.session_state:
+    st.session_state.value = ""
+if 'withdrawn' not in st.session_state:
+    st.session_state.withdrawn = ""
+
 # إدخال بيانات عامل جديد
 st.subheader("Add New Worker")
-name = st.text_input("Worker Name")
-value = st.text_input("Enter the total :")
-withdrawn = st.text_input("Enter the withdrawn:")
+st.session_state.name = st.text_input("Worker Name", st.session_state.name)
+st.session_state.value = st.text_input("Enter the total :", st.session_state.value)
+st.session_state.withdrawn = st.text_input("Enter the withdrawn:", st.session_state.withdrawn)
 
 col1, col2 = st.columns(2)
 add_clicked = col1.button("Add Worker")
-show_clicked = col2.button("Show Table")
+done_clicked = col2.button("Done")
 
 if add_clicked:
-    if name and value and withdrawn:
+    if st.session_state.name and st.session_state.value and st.session_state.withdrawn:
         try:
-            value_f = float(value)
-            withdrawn_f = float(withdrawn)
+            value_f = float(st.session_state.value)
+            withdrawn_f = float(st.session_state.withdrawn)
 
             half_value = value_f / 2
             after_withdraw = half_value - withdrawn_f
 
-            # شروط الخصم
             if half_value == 40:
                 fee = 20
             elif half_value == 45:
@@ -47,58 +57,38 @@ if add_clicked:
 
             final_amount = after_withdraw - fee
 
-            # حفظ البيانات في القائمة
+            # حفظ البيانات
             st.session_state.workers.append({
-                "Worker": name,
+                "Worker": st.session_state.name,
                 "Total": clean_number(value_f),
                 "Due": clean_number(fee),
                 "Withdrawn": clean_number(withdrawn_f),
                 "Remaining": clean_number(final_amount)
             })
 
-            # مسح الحقول
-            st.success(f"Worker '{name}' added successfully.")
+            # حفظ اسم آخر عامل
+            st.session_state.last_added = st.session_state.name
+
+            # تفريغ الحقول تلقائيًا
+            st.session_state.name = ""
+            st.session_state.value = ""
+            st.session_state.withdrawn = ""
 
         except ValueError:
             st.error("Please enter valid numbers.")
     else:
         st.warning("Please fill in all fields before adding.")
 
-# عرض جدول العمال
-if show_clicked and st.session_state.workers:
-    st.markdown("### Workers Table")
+# عرض اسم آخر عامل تم تسجيله مع علامة صح
+if st.session_state.last_added:
+    st.success(f"✓ Worker '{st.session_state.last_added}' added successfully.")
 
-    # تنسيق الجدول بـ HTML
-    table_html = """
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            text-align: center;
-            padding: 10px;
-            font-weight: bold;
-            border-bottom: 1px solid #ddd;
-        }
-    </style>
-    <table>
-        <tr><th>Worker</th><th>Total</th><th>Due</th><th>Withdrawn</th><th>Remaining</th></tr>
-    """
+# عند الضغط على Done نعرض الجدول
+if done_clicked:
+    if st.session_state.workers:
+        st.markdown("### Workers Table")
 
-    for worker in st.session_state.workers:
-        table_html += f"""
-        <tr>
-            <td>{worker['Worker']}</td>
-            <td>{worker['Total']}</td>
-            <td>{worker['Due']}</td>
-            <td>{worker['Withdrawn']}</td>
-            <td>{worker['Remaining']}</td>
-        </tr>
-        """
-
-    table_html += "</table>"
-    st.markdown(table_html, unsafe_allow_html=True)
-
-elif show_clicked:
-    st.info("No workers added yet.")
+        df = pd.DataFrame(st.session_state.workers)
+        st.dataframe(df, use_container_width=True)
+    else:
+        st.info("No workers added yet.")
