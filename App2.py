@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from datetime import datetime
 
 def clean_number(n):
     return int(n) if n == int(n) else n
@@ -33,9 +34,11 @@ if st.button("OK"):
             value_f = float(value)
             withdrawn_f = float(withdrawn) if withdrawn else 0
             due_custom = float(due_optional) if due_optional else None
+            today_str = datetime.today().strftime("%-d/%-m")  # اليوم/الشهر
 
             if is_cf:
                 st.session_state.workers.append({
+                    "Date": today_str,
                     "Worker": name,
                     "Total": clean_number(value_f),
                     "Due": "",
@@ -68,6 +71,7 @@ if st.button("OK"):
                 final_amount = after_withdraw - fee
 
                 st.session_state.workers.append({
+                    "Date": today_str,
                     "Worker": name,
                     "Total": clean_number(value_f),
                     "Due": clean_number(fee),
@@ -91,6 +95,7 @@ if st.button("OK"):
 # Display Table and Summary
 if st.session_state.workers:
     df = pd.DataFrame(st.session_state.workers)
+    df = df[["Date", "Worker", "Total", "Due", "Withdrawn", "Remaining"]]  # إعادة ترتيب الأعمدة
     st.markdown("### Workers Table")
     st.dataframe(df, use_container_width=True)
 
