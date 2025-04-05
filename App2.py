@@ -4,8 +4,8 @@ import pandas as pd
 def clean_number(n):
     return int(n) if n == int(n) else n
 
-st.set_page_config(page_title="Workers Payment Calculator", page_icon="✅")
-st.title("Workers Payment Calculator")
+st.set_page_config(page_title="CleanFoam", page_icon="✅")
+st.title("CleanFoam")
 
 # Session state init
 if 'workers' not in st.session_state:
@@ -90,7 +90,7 @@ if st.session_state.workers:
     for_workera = sum([w['Withdrawn'] + w['Remaining'] for w in st.session_state.workers])
     for_cleanfoam = total_sum - for_workera
 
-    st.markdown(f"### Total of All Workers: **{clean_number(total_sum)}**")
+    st.markdown(f"### Total: **{clean_number(total_sum)}**")
     st.markdown(f"**For workera:** {clean_number(for_workera)}")
     st.markdown(f"**For CleanFoam:** {clean_number(for_cleanfoam)}")
 else:
