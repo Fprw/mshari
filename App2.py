@@ -4,10 +4,10 @@ import pandas as pd
 def clean_number(n):
     return int(n) if n == int(n) else n
 
-st.set_page_config(page_title="Workers Payment Calculator", page_icon="✅")
-st.title("Workers Payment Calculator")
+st.set_page_config(page_title="CleanFoam", page_icon="✅")
+st.title("CleanFoam")
 
-# Initialize session state for workers and inputs
+# Initialize session state
 if 'workers' not in st.session_state:
     st.session_state.workers = []
 if 'name_input' not in st.session_state:
@@ -19,16 +19,12 @@ if 'withdrawn_input' not in st.session_state:
 
 # Input fields
 st.subheader("Add New Worker")
-st.session_state.name_input = st.text_input("Worker Name", st.session_state.name_input)
-st.session_state.value_input = st.text_input("Enter the total :", st.session_state.value_input)
-st.session_state.withdrawn_input = st.text_input("Enter the withdrawn:", st.session_state.withdrawn_input)
+name = st.text_input("Worker Name", st.session_state.name_input, key="name_input_key")
+value = st.text_input("Enter the total :", st.session_state.value_input, key="value_input_key")
+withdrawn = st.text_input("Enter the withdrawn:", st.session_state.withdrawn_input, key="withdrawn_input_key")
 
 # OK Button
 if st.button("OK"):
-    name = st.session_state.name_input
-    value = st.session_state.value_input
-    withdrawn = st.session_state.withdrawn_input
-
     if name and value and withdrawn:
         try:
             value_f = float(value)
@@ -37,14 +33,17 @@ if st.button("OK"):
             half_value = value_f / 2
             after_withdraw = half_value - withdrawn_f
 
+            # Updated fee logic with new conditions
             if half_value == 40:
                 fee = 20
             elif half_value == 45:
                 fee = 22.5
             elif half_value == 50:
                 fee = 25
-            elif half_value == 55:
+            elif half_value == 52.5:
                 fee = 27.5
+            elif half_value == 55:
+                fee = 25
             elif value_f == 95:
                 fee = 22.5
             elif int(value_f) % 10 == 5:
@@ -54,7 +53,7 @@ if st.button("OK"):
 
             final_amount = after_withdraw - fee
 
-            # Add worker
+            # Add to workers
             st.session_state.workers.append({
                 "Worker": name,
                 "Total": clean_number(value_f),
@@ -63,17 +62,21 @@ if st.button("OK"):
                 "Remaining": clean_number(final_amount)
             })
 
-            # Clear inputs
+            # Clear input fields
             st.session_state.name_input = ""
             st.session_state.value_input = ""
             st.session_state.withdrawn_input = ""
+
+            # Manually clear visible inputs
+            st.experimental_set_query_params()  # optional to reset URL state
+            st.rerun()
 
         except ValueError:
             st.error("Please enter valid numbers.")
     else:
         st.warning("Please fill in all fields before pressing OK.")
 
-# Display workers table
+# Display table
 if st.session_state.workers:
     st.markdown("### Workers Table")
     df = pd.DataFrame(st.session_state.workers)
