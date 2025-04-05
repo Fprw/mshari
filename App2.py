@@ -45,7 +45,7 @@ if st.button("OK"):
             elif half_value == 40:
                 fee = 20
             elif half_value == 45:
-                fee = 22.5
+                fee = 20
             elif half_value == 50:
                 fee = 25
             elif half_value == 52.5:
