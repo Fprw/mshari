@@ -21,12 +21,12 @@ if 'due_input' not in st.session_state:
 if 'manual_date_input' not in st.session_state:
     st.session_state.manual_date_input = ""
 
-# التاريخ اليدوي (فوق الجدول وخارج الإضافة)
+# إدخال التاريخ في الأعلى
 st.subheader("Today's Date")
-manual_date = st.text_input("Enter date for today's records (e.g., 1/4)", st.session_state.manual_date_input)
-st.session_state.manual_date_input = manual_date  # نحدث القيمة في السيشن
+manual_date = st.text_input("Enter today's date (e.g., 1/4)", st.session_state.manual_date_input)
+st.session_state.manual_date_input = manual_date  # تحديث التاريخ في الجلسة
 
-# قسم إدخال بيانات العمال
+# قسم إدخال العامل
 st.subheader("Add Worker")
 name = st.text_input("Name", st.session_state.name_input)
 value = st.text_input("Enter the total :", st.session_state.value_input)
@@ -43,7 +43,6 @@ if st.button("OK"):
 
             if is_cf:
                 st.session_state.workers.append({
-                    "Date": manual_date,
                     "Worker": name,
                     "Total": clean_number(value_f),
                     "Due": "",
@@ -76,7 +75,6 @@ if st.button("OK"):
                 final_amount = after_withdraw - fee
 
                 st.session_state.workers.append({
-                    "Date": manual_date,
                     "Worker": name,
                     "Total": clean_number(value_f),
                     "Due": clean_number(fee),
@@ -97,11 +95,16 @@ if st.button("OK"):
     else:
         st.warning("Please fill in at least date, name, and total.")
 
-# عرض الجدول
+# عرض التاريخ كمربع فوق الجدول
 if st.session_state.workers:
-    st.markdown("### Workers Table")
+    st.markdown(f"""
+        <div style="border: 2px solid #ddd; padding: 10px; text-align: center; font-weight: bold; font-size: 18px; background-color: #f9f9f9;">
+            {manual_date}
+        </div>
+        """, unsafe_allow_html=True)
+
     df = pd.DataFrame(st.session_state.workers)
-    df = df[["Date", "Worker", "Total", "Due", "Withdrawn", "Remaining"]]
+    st.markdown("### Workers Table")
     st.dataframe(df, use_container_width=True)
 
     total_sum = sum([w['Total'] for w in st.session_state.workers if isinstance(w['Total'], (int, float))])
