@@ -21,12 +21,13 @@ if 'due_input' not in st.session_state:
 if 'manual_date_input' not in st.session_state:
     st.session_state.manual_date_input = ""
 
-# Input fields
+# التاريخ اليدوي (فوق الجدول وخارج الإضافة)
+st.subheader("Today's Date")
+manual_date = st.text_input("Enter date for today's records (e.g., 1/4)", st.session_state.manual_date_input)
+st.session_state.manual_date_input = manual_date  # نحدث القيمة في السيشن
+
+# قسم إدخال بيانات العمال
 st.subheader("Add Worker")
-
-# التاريخ اليدوي قبل الاسم
-manual_date = st.text_input("Date", st.session_state.manual_date_input)
-
 name = st.text_input("Name", st.session_state.name_input)
 value = st.text_input("Enter the total :", st.session_state.value_input)
 withdrawn = st.text_input("Enter the withdrawn:", st.session_state.withdrawn_input)
@@ -84,7 +85,6 @@ if st.button("OK"):
                 })
 
             # Clear inputs
-            st.session_state.manual_date_input = ""
             st.session_state.name_input = ""
             st.session_state.value_input = ""
             st.session_state.withdrawn_input = ""
@@ -97,11 +97,11 @@ if st.button("OK"):
     else:
         st.warning("Please fill in at least date, name, and total.")
 
-# Display Table and Summary
+# عرض الجدول
 if st.session_state.workers:
-    df = pd.DataFrame(st.session_state.workers)
-    df = df[["Date", "Worker", "Total", "Due", "Withdrawn", "Remaining"]]  # ترتيب الأعمدة
     st.markdown("### Workers Table")
+    df = pd.DataFrame(st.session_state.workers)
+    df = df[["Date", "Worker", "Total", "Due", "Withdrawn", "Remaining"]]
     st.dataframe(df, use_container_width=True)
 
     total_sum = sum([w['Total'] for w in st.session_state.workers if isinstance(w['Total'], (int, float))])
@@ -116,7 +116,7 @@ if st.session_state.workers:
     st.markdown(f"**For workera:** {clean_number(for_workera)}")
     st.markdown(f"**For CleanFoam:** {clean_number(for_cleanfoam)}")
 
-    # Delete worker
+    # حذف عامل
     st.markdown("### Delete")
     worker_names = [w['Worker'] for w in st.session_state.workers]
     selected_worker = st.selectbox("Select worker to delete", worker_names)
