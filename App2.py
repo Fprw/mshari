@@ -11,8 +11,8 @@ st.title("CleanFoam")
 if 'workers' not in st.session_state:
     st.session_state.workers = []
 
-if 'last_added' not in st.session_state:
-    st.session_state.last_added = ""
+if 'added_names' not in st.session_state:
+    st.session_state.added_names = []
 
 if 'name' not in st.session_state:
     st.session_state.name = ""
@@ -21,17 +21,33 @@ if 'value' not in st.session_state:
 if 'withdrawn' not in st.session_state:
     st.session_state.withdrawn = ""
 
+# عرض أسماء العمال المضافة
+if st.session_state.added_names:
+    st.markdown("### Added Workers:")
+    names_html = "<div style='display:flex; flex-wrap:wrap;'>"
+    for worker_name in st.session_state.added_names:
+        names_html += f"""
+        <div style='background-color:#d4edda; color:#155724; border-radius:5px;
+                    padding:6px 12px; margin:5px; font-weight:bold; display:inline-block;'>
+            ✓ {worker_name}
+        </div>
+        """
+    names_html += "</div>"
+    st.markdown(names_html, unsafe_allow_html=True)
+
 # إدخال بيانات عامل جديد
 st.subheader("Add New Worker")
 st.session_state.name = st.text_input("Worker Name", st.session_state.name)
 st.session_state.value = st.text_input("Enter the total :", st.session_state.value)
 st.session_state.withdrawn = st.text_input("Enter the withdrawn:", st.session_state.withdrawn)
 
-col1, col2 = st.columns(2)
-add_clicked = col1.button("Add Worker")
-done_clicked = col2.button("Done")
+col1, col2, col3 = st.columns(3)
+ok_clicked = col1.button("OK")
+add_next_clicked = col2.button("Add Worker")
+done_clicked = col3.button("Done")
 
-if add_clicked:
+# OK يقوم بالحساب وتسجيل العامل
+if ok_clicked:
     if st.session_state.name and st.session_state.value and st.session_state.withdrawn:
         try:
             value_f = float(st.session_state.value)
@@ -66,28 +82,24 @@ if add_clicked:
                 "Remaining": clean_number(final_amount)
             })
 
-            # حفظ اسم آخر عامل
-            st.session_state.last_added = st.session_state.name
-
-            # تفريغ الحقول تلقائيًا
-            st.session_state.name = ""
-            st.session_state.value = ""
-            st.session_state.withdrawn = ""
+            # إضافة الاسم إلى القائمة الظاهرة
+            st.session_state.added_names.append(st.session_state.name)
 
         except ValueError:
             st.error("Please enter valid numbers.")
     else:
-        st.warning("Please fill in all fields before adding.")
+        st.warning("Please fill in all fields before pressing OK.")
 
-# عرض اسم آخر عامل تم تسجيله مع علامة صح
-if st.session_state.last_added:
-    st.success(f"✓ Worker '{st.session_state.last_added}' added successfully.")
+# Add Worker يقوم فقط بتصفية الحقول
+if add_next_clicked:
+    st.session_state.name = ""
+    st.session_state.value = ""
+    st.session_state.withdrawn = ""
 
 # عند الضغط على Done نعرض الجدول
 if done_clicked:
     if st.session_state.workers:
         st.markdown("### Workers Table")
-
         df = pd.DataFrame(st.session_state.workers)
         st.dataframe(df, use_container_width=True)
     else:
