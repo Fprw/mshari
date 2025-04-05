@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 
 def clean_number(n):
     return int(n) if n == int(n) else n
@@ -7,32 +6,17 @@ def clean_number(n):
 st.set_page_config(page_title="Worker Payment Calculator", page_icon="💰")
 st.title("Worker Payment Calculator")
 
-# استخدام session_state لحفظ القيم
-if "value" not in st.session_state:
-    st.session_state.value = ""
-if "withdrawn" not in st.session_state:
-    st.session_state.withdrawn = ""
+value = st.text_input("Enter the total :")
+withdrawn = st.text_input("Enter the withdrawn:")
 
-# إدخال القيم
-value = st.text_input("Enter the total :", st.session_state.value)
-withdrawn = st.text_input("Enter the withdrawn:", st.session_state.withdrawn)
-
-# أزرار
-col1, col2 = st.columns(2)
-calculate_clicked = col1.button("Calculate")
-reset_clicked = col2.button("Reset")
-
-if calculate_clicked:
+if st.button("Calculate"):
     if value and withdrawn:
         try:
-            value_f = float(value)
-            withdrawn_f = float(withdrawn)
+            value = float(value)
+            withdrawn = float(withdrawn)
 
-            st.session_state.value = value
-            st.session_state.withdrawn = withdrawn
-
-            half_value = value_f / 2
-            after_withdraw = half_value - withdrawn_f
+            half_value = value / 2
+            after_withdraw = half_value - withdrawn
 
             if half_value == 40:
                 fee = 20
@@ -42,37 +26,42 @@ if calculate_clicked:
                 fee = 25
             elif half_value == 55:
                 fee = 27.5
-            elif value_f == 95:
+            elif value == 95:
                 fee = 22.5
-            elif int(value_f) % 10 == 5:
+            elif int(value) % 10 == 5:
                 fee = 32.5
             else:
                 fee = 30
 
             final_amount = after_withdraw - fee
 
-            # جدول النتائج
-            data = {
-                "Label": ["Total", "Due", "Withdrawn", "Remaining"],
-                "Value": [
-                    clean_number(value_f),
-                    clean_number(fee),
-                    clean_number(withdrawn_f),
-                    clean_number(final_amount),
-                ]
-            }
+            # بناء الجدول بـ HTML لتنسيق النص في الوسط وجعله عريض
+            table_html = f"""
+            <style>
+                table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                }}
+                th, td {{
+                    text-align: center;
+                    padding: 10px;
+                    font-weight: bold;
+                    border-bottom: 1px solid #ddd;
+                }}
+            </style>
+            <table>
+                <tr><th>Label</th><th>Value</th></tr>
+                <tr><td>Total</td><td>{clean_number(value)}</td></tr>
+                <tr><td>Due</td><td>{clean_number(fee)}</td></tr>
+                <tr><td>Withdrawn</td><td>{clean_number(withdrawn)}</td></tr>
+                <tr><td>Remaining</td><td>{clean_number(final_amount)}</td></tr>
+            </table>
+            """
 
-            df = pd.DataFrame(data)
             st.markdown("### Result")
-            st.dataframe(df, use_container_width=True)
+            st.markdown(table_html, unsafe_allow_html=True)
 
         except ValueError:
             st.error("Please enter valid numbers.")
     else:
         st.warning("Please fill in both fields before calculating.")
-
-# إعادة تعيين القيم
-if reset_clicked:
-    st.session_state.value = ""
-    st.session_state.withdrawn = ""
-    st.experimental_rerun()
