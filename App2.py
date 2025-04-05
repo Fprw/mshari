@@ -26,6 +26,9 @@ value = st.text_input("Enter the total :", st.session_state.value_input)
 withdrawn = st.text_input("Enter the withdrawn:", st.session_state.withdrawn_input)
 due_optional = st.text_input("Enter custom Due (optional):", st.session_state.due_input)
 
+# New checkbox: Disable division by 2
+disable_division = st.checkbox("Disable division by 2")
+
 if st.button("OK"):
     if name and value:
         try:
@@ -33,7 +36,7 @@ if st.button("OK"):
             withdrawn_f = float(withdrawn) if withdrawn else 0
             due_custom = float(due_optional) if due_optional else None
 
-            half_value = value_f / 2
+            half_value = value_f if disable_division else value_f / 2
             after_withdraw = half_value - withdrawn_f
 
             # Fee (Due) Logic
