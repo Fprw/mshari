@@ -7,18 +7,28 @@ def clean_number(n):
 st.set_page_config(page_title="Workers Payment Calculator", page_icon="✅")
 st.title("Workers Payment Calculator")
 
-# Initialize session state
+# Initialize session state for workers and inputs
 if 'workers' not in st.session_state:
     st.session_state.workers = []
+if 'name_input' not in st.session_state:
+    st.session_state.name_input = ""
+if 'value_input' not in st.session_state:
+    st.session_state.value_input = ""
+if 'withdrawn_input' not in st.session_state:
+    st.session_state.withdrawn_input = ""
 
-# Input fields (بدون key في النصوص)
+# Input fields
 st.subheader("Add New Worker")
-name = st.text_input("Worker Name")
-value = st.text_input("Enter the total :")
-withdrawn = st.text_input("Enter the withdrawn:")
+st.session_state.name_input = st.text_input("Worker Name", st.session_state.name_input)
+st.session_state.value_input = st.text_input("Enter the total :", st.session_state.value_input)
+st.session_state.withdrawn_input = st.text_input("Enter the withdrawn:", st.session_state.withdrawn_input)
 
 # OK Button
 if st.button("OK"):
+    name = st.session_state.name_input
+    value = st.session_state.value_input
+    withdrawn = st.session_state.withdrawn_input
+
     if name and value and withdrawn:
         try:
             value_f = float(value)
@@ -44,7 +54,7 @@ if st.button("OK"):
 
             final_amount = after_withdraw - fee
 
-            # Add worker to list
+            # Add worker
             st.session_state.workers.append({
                 "Worker": name,
                 "Total": clean_number(value_f),
@@ -53,21 +63,22 @@ if st.button("OK"):
                 "Remaining": clean_number(final_amount)
             })
 
-            # Refresh page to clear inputs
-            st.experimental_rerun()
+            # Clear inputs
+            st.session_state.name_input = ""
+            st.session_state.value_input = ""
+            st.session_state.withdrawn_input = ""
 
         except ValueError:
             st.error("Please enter valid numbers.")
     else:
         st.warning("Please fill in all fields before pressing OK.")
 
-# Show current workers table
+# Display workers table
 if st.session_state.workers:
     st.markdown("### Workers Table")
     df = pd.DataFrame(st.session_state.workers)
     st.dataframe(df, use_container_width=True)
 
-    # Show total of all "Total" values
     total_sum = sum([w['Total'] for w in st.session_state.workers])
     st.markdown(f"### Total of All Workers: **{clean_number(total_sum)}**")
 else:
